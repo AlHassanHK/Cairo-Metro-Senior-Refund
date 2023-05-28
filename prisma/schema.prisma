@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int               @id @default(autoincrement())
+  email          String            @unique
+  phoneNumber    String            @unique
+  password       String
+  role           UserRole
+  isSenior       Boolean
+  name           String
+  subscription   SubscriptionType?
+  refundRequests RefundRequest[]
+  seniorRequest  SeniorRequest?
+  rides          Trip[]
+}
+
+model Schedule {
+  id        Int      @id @default(autoincrement())
+  startTime DateTime
+  endTime   DateTime
+  routeId   RouteId
+}
+
+model Trip {
+  id               String          @id @default(uuid())
+  userId           Int
+  startLocation    String
+  purchasedAt      DateTime
+  status           RideStatus
+  totalPrice       Int
+  route            RouteId
+  transferStations String[]
+  RefundRequest    RefundRequest[]
+  user             User            @relation(fields: [userId], references: [id])
+}
+
+model SeniorRequest {
+  id         Int                 @id @default(autoincrement())
+  userId     Int                 @unique
+  idImage    String
+  status     SeniorRequestStatus
+  reviewedBy Int?
+  createdAt  DateTime            @default(now())
+  user       User                @relation(fields: [userId], references: [id])
+}
+
+model RefundRequest {
+  id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status      RefundRequestStatus
+  reviewedBy  Int?
+  createdAt   DateTime
+  description String
+  tripId      String
+  userId      Int?
+  trip        Trip                @relation(fields: [tripId], references: [id])
+  User        User?               @relation(fields: [userId], references: [id])
+}
+
+enum SubscriptionType {
+  Monthly
+  Quarterly
+  Annual
+}
+
+enum UserRole {
+  User
+  Senior
+  Admin
+}
+
+enum RouteId {
+  one
+  two
+  three
+}
+
+enum RideStatus {
+  completed
+  cancelled
+  ongoing
+}
+
+enum SeniorRequestStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum RefundRequestStatus {
+  Pending
+  Approved
+  Rejected
+}
