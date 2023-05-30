@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+import axios from "axios";
 //Database enums, user RideStatus.pending for example
 import { UserRole } from "@prisma/client";
 import { RouteId } from "@prisma/client";
@@ -31,6 +31,8 @@ const approveSeniorRequest = async (req, res) => {
         reviewedBy: req.body.reviewedBy,
       }
     })
+    console.log(updated.userId);
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": true });
     res.status(200).json({
       status: `Successfully approved : ${id}`,
       newDocument: updated
@@ -58,6 +60,7 @@ const rejectSeniorRequest = async (req, res) => {
         reviewedBy: req.body.reviewedBy,
       }
     })
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": false });
     res.status(200).json({
       status: `Successfully rejected : ${id}`,
       newDocument: updated
