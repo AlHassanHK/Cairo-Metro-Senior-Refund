@@ -18,7 +18,6 @@ const getAllSeniorRequests = async (req, res) => {
   }
 };
 
-
 const approveSeniorRequest = async (req, res) => {
   try {
     const id = req.body.id;
@@ -42,12 +41,6 @@ const approveSeniorRequest = async (req, res) => {
   }
 
 }
-
-
-
-
-
-
 const rejectSeniorRequest = async (req, res) => {
   try {
     const id = req.body.id;
@@ -60,7 +53,7 @@ const rejectSeniorRequest = async (req, res) => {
         reviewedBy: req.body.reviewedBy,
       }
     })
-    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": false });
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": false   });
     res.status(200).json({
       status: `Successfully rejected : ${id}`,
       newDocument: updated
@@ -69,11 +62,6 @@ const rejectSeniorRequest = async (req, res) => {
     res.status(400).json({ error: error.message })
   }
 }
-
-
-
-
-
 
 export default {
   getAllSeniorRequests,
