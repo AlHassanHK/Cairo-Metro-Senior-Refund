@@ -28,10 +28,10 @@ const updateSeniorRequest = async (req, res) => {
         nationalId: nationalId
       },
       select: {
-        nationalId: true
+        nationalId
       }
     });
-    const nIdToString = nId.nationalId.toString();
+    const nIdToString = nId.toString();
     const updated = await seniorRequests.update({
       where: {
         id: id
@@ -41,16 +41,37 @@ const updateSeniorRequest = async (req, res) => {
         reviewedBy: req.body.reviewedBy,
       }
     })
-    console.log(nId.toString());
-    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": updated.status == "Approved" ? true : false });
+    console.log(updated.userId);
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": true });
     res.status(200).json({
-      status: `Successfully updated : ${id}`,
+      status: `Successfully approved : ${id}`,
       newDocument: updated
     })
   } catch (error) {
     res.status(400).json({ error: error.message })
   }
 }
+// const rejectSeniorRequest = async (req, res) => {
+//   try {
+//     const id = req.body.id;
+//     const updated = await seniorRequests.update({
+//       where: {
+//         id: id
+//       },
+//       data: {
+//         status: SeniorRequestStatus.Rejected,
+//         reviewedBy: req.body.reviewedBy,
+//       }
+//     })
+//     await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": false   });
+//     res.status(200).json({
+//       status: `Successfully rejected : ${id}`,
+//       newDocument: updated
+//     })
+//   } catch (error) {
+//     res.status(400).json({ error: error.message })
+//   }
+// }
 
 export default {
   getAllSeniorRequests,

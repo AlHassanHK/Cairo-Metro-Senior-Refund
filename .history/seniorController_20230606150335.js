@@ -42,7 +42,7 @@ const updateSeniorRequest = async (req, res) => {
       }
     })
     console.log(nId.toString());
-    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": updated.status == "Approved" ? true : false });
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": updated.status=="Approved" });
     res.status(200).json({
       status: `Successfully updated : ${id}`,
       newDocument: updated

@@ -4,6 +4,6 @@ const router = express.Router();
 
 //define function logic in controller
 router.route("/").get(seniorController.getAllSeniorRequests);
-router.route("/update").patch(seniorController.updateSeniorRequest);
+router.route("/update").post(seniorController.updateSeniorRequest);
 //router.route("/reject").post(seniorController.rejectSeniorRequest);
 export default router;  

@@ -8,7 +8,6 @@ import { RefundRequestStatus, SeniorRequestStatus } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const seniorRequests = prisma.SeniorRequest;
-const users = prisma.User;
 
 const getAllSeniorRequests = async (req, res) => {
   try {
@@ -19,32 +18,44 @@ const getAllSeniorRequests = async (req, res) => {
   }
 };
 
-
-const updateSeniorRequest = async (req, res) => {
+const approveSeniorRequest = async (req, res) => {
   try {
-    const { id, nationalId } = req.body;
-    const nId = await users.findUnique({
-      where: {
-        nationalId: nationalId
-      },
-      select: {
-        nationalId: true
-      }
-    });
-    const nIdToString = nId.nationalId.toString();
+    const id = req.body.id;
     const updated = await seniorRequests.update({
       where: {
         id: id
       },
       data: {
-        status: nIdToString.charAt(0) > 2 || nIdToString.substring(1, 3) > 63 ? SeniorRequestStatus.Rejected : SeniorRequestStatus.Approved,
+        status: SeniorRequestStatus.Approved,
         reviewedBy: req.body.reviewedBy,
       }
     })
-    console.log(nId.toString());
-    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": updated.status == "Approved" ? true : false });
+    console.log(updated.userId);
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": true });
     res.status(200).json({
-      status: `Successfully updated : ${id}`,
+      status: `Successfully approved : ${id}`,
+      newDocument: updated
+    })
+  } catch (error) {
+    res.status(400).json({ error: error.message })
+  }
+
+}
+const rejectSeniorRequest = async (req, res) => {
+  try {
+    const id = req.body.id;
+    const updated = await seniorRequests.update({
+      where: {
+        id: id
+      },
+      data: {
+        status: SeniorRequestStatus.Rejected,
+        reviewedBy: req.body.reviewedBy,
+      }
+    })
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": false   });
+    res.status(200).json({
+      status: `Successfully rejected : ${id}`,
       newDocument: updated
     })
   } catch (error) {
@@ -54,8 +65,8 @@ const updateSeniorRequest = async (req, res) => {
 
 export default {
   getAllSeniorRequests,
-  //rejectSeniorRequest,
-  updateSeniorRequest
+  rejectSeniorRequest,
+  approveSeniorRequest
 
 };
 

@@ -28,10 +28,10 @@ const updateSeniorRequest = async (req, res) => {
         nationalId: nationalId
       },
       select: {
-        nationalId: true
+        nationalId
       }
     });
-    const nIdToString = nId.nationalId.toString();
+    const nIdToString = nId.toString();
     const updated = await seniorRequests.update({
       where: {
         id: id
@@ -41,10 +41,10 @@ const updateSeniorRequest = async (req, res) => {
         reviewedBy: req.body.reviewedBy,
       }
     })
-    console.log(nId.toString());
-    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": updated.status == "Approved" ? true : false });
+    console.log(updated.userId);
+    await axios.patch("https://metro-user.vercel.app/api/user/", { "id": updated.userId, "isSenior": true });
     res.status(200).json({
-      status: `Successfully updated : ${id}`,
+      status: `Successfully approved : ${id}`,
       newDocument: updated
     })
   } catch (error) {
