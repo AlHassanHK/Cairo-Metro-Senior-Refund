@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 
 const refundRequests = prisma.RefundRequest;
 const user = prisma.User;
+const trip= prisma.Trip;
 
 
 
@@ -83,10 +84,44 @@ const rejectRefundRequest = async(req, res)=>{
   }
 }
 
+const createRefundRequest= async(req, res)=>{
+  try {
+    const result = await trip.findUnique({
+      where: {
+        id: req.params.id,
+        userId: req.body.userId
+      },
+      include: {
+        status: true,
+      },
+    });
+    const status= result.status;
+    if(status.includes('pending')){
+      const newRequest = await prisma.refundRequests.create({
+        data: {
+           description : req.body.description,  
+           status: status,
+           createdAt: new Date(),
+           tripId: req.params.id,
+           userId: req.body.userId,
+         },
+       });
+
+       res.status(200).json({ data: newRequest }); 
+    }
+    else{
+      res.status(400).json({ error: "Request is rejected, trip status is no longer pending" });
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message })
+  }
+}
+
 export default {
   getAllRefundRequests,
   approveRefundRequest,
-  rejectRefundRequest
+  rejectRefundRequest,
+  createRefundRequest
 };
 
 
