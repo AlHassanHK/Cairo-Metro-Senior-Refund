@@ -4,11 +4,12 @@ import { PrismaClient } from "@prisma/client";
 import { UserRole } from "@prisma/client";
 import { RouteId } from "@prisma/client";
 import { RefundRequestStatus } from "@prisma/client";
-
+import email from "./email.js";
 
 const prisma = new PrismaClient();
 
 const refundRequests = prisma.RefundRequest;
+const user = prisma.User;
 
 
 
@@ -31,14 +32,24 @@ const approveRefundRequest = async (req, res) =>{
       data: {
         status: RefundRequestStatus.Approved,
         reviewedBy: req.body.reviewedBy,
+        
+      },include:{
+        trip:{
+          include:{
+            user:true
+          }
+        },
       }
     })
+    const trip = updated.trip;
+    const totalPrice = trip.totalPrice;
+    email.sendEmail(updated.trip.user.email, id, RefundRequestStatus.Approved, totalPrice);
     res.status(200).json({
       status: `Successfully approved : ${id}`,
       newDocument: updated
     })
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    res.status(400).send(error.message)
   }
 }
 
@@ -52,8 +63,17 @@ const rejectRefundRequest = async(req, res)=>{
       data: {
         status: RefundRequestStatus.Rejected,
         reviewedBy: req.body.reviewedBy,
+        
+      },include:{
+        trip:{
+          include:{
+            user:true
+          }
+        },
       }
     })
+    const totalPrice = "None";
+    email.sendEmail(updated.trip.user.email, id, RefundRequestStatus.Rejected, totalPrice);
     res.status(200).json({
       status: `Successfully rejected : ${id}`,
       newDocument: updated
@@ -68,6 +88,7 @@ export default {
   approveRefundRequest,
   rejectRefundRequest
 };
+
 
 
 
